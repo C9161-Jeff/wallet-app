@@ -17,7 +17,15 @@ let harcamaListesi = [];
 
 window.addEventListener("load", () => {
   gelirler = Number(localStorage.getItem("gelirler")) || 0; //! Local storage den gelirleri al numberlaştır. Veri yoksa 0 ata
+  harcamaListesi = JSON.parse(localStorage.getItem("harcamalar")) || [];
+
+  harcamaListesi.forEach((harcama) => {
+    harcamayiDomaYaz(harcama);
+  });
+
   gelirinizTd.textContent = gelirler;
+
+  hesaplaVeGuncelle();
   tarihInput.valueAsDate = new Date();
 });
 
@@ -28,7 +36,8 @@ ekleFormu.addEventListener("submit", (e) => {
   ekleFormu.reset();
   console.log(gelirler);
   localStorage.setItem("gelirler", gelirler);
-  gelirinizTd.textContent = gelirler;
+  hesaplaVeGuncelle();
+  // gelirinizTd.textContent = gelirler
 });
 
 //! Harcama Formu
@@ -58,13 +67,16 @@ harcamaFormu.addEventListener("submit", (e) => {
 
   harcamaFormu.reset();
   tarihInput.valueAsDate = new Date();
+  hesaplaVeGuncelle();
 });
+
+//& Harcamayı Dom'a yaz
 
 const harcamayiDomaYaz = ({ id, miktar, tarih, alan }) => {
   // const {id, miktar, tarih, alan} = yeniHarcama
   // console.log(id, miktar, tarih, alan)
 
-  //! 1. yöntem
+  //! 1. yöntem (Eski ve güvenlik açığı nedeniyle kullanılmaması gereken)
   // harcamaBody.innerHTML += `
   //     <tr>
   //         <td>${tarih}</td>
@@ -74,7 +86,7 @@ const harcamayiDomaYaz = ({ id, miktar, tarih, alan }) => {
   //     </tr>
 
   // `
-
+  //^ innerHTML kullandığımızda aşağıdaki kodları harcama alanına yazarsak istemediğimiz şekilde bir tablo düzeni ile karşılaşırız.
   //^ <h2>Hello World!</h2><p>Have a nice day!</p>
   //^ <img src="https://5.imimg.com/data5/VK/EK/UG/SELLER-101818061/danger-signs-500x500.jpg">
 
@@ -104,5 +116,19 @@ const harcamayiDomaYaz = ({ id, miktar, tarih, alan }) => {
     createLastTd() // Çöp kutusu ve id yi ekler
   );
 
-  harcamaBody.append(tr);
+  harcamaBody.append(tr); //& son girileni alta ekler
+  // harcamaBody.prepend(tr) //& son girileni öne ekler
+};
+
+const hesaplaVeGuncelle = () => {
+  const giderler = harcamaListesi.reduce(
+    (toplam, harcama) => toplam + Number(harcama.miktar),
+    0
+  );
+
+  // console.log(giderler)
+
+  giderinizTd.textContent = giderler;
+  gelirinizTd.textContent = gelirler;
+  kalanTd.textContent = gelirler - giderler;
 };
